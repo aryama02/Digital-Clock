@@ -1,0 +1,11 @@
+# Local secrets and environment files
+config/secrets/
+Api-keys.txt
+*.env
+*.env.*
+!.env.example
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db
