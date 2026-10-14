@@ -67,11 +67,19 @@ class Model {
         return result.timezone;
     }
 
+    formatLocationName(locationName, stateCode = "") {
+        const city = locationName
+            .trim()
+            .replace(/^(?:township|town|city|village)\s+of\s+/i, "")
+            .replace(/\s+(?:township|town|city|village)$/i, "");
+        return stateCode ? `${city}, ${stateCode.toUpperCase()}` : city;
+    }
+
     async loadLocationName() {
         const data = await this.getData(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${this.lat}&longitude=${this.lon}&localityLanguage=en`);
         const city = data.city || data.locality || data.principalSubdivision;
-        const state = data.principalSubdivisionCode?.split("-").pop() || data.principalSubdivision;
-        this.locationName = city && state ? `${city}, ${state}` : city || "Current location";
+        const stateCode = data.principalSubdivisionCode?.split("-").pop() || "";
+        this.locationName = city ? this.formatLocationName(city, stateCode) : "Current location";
     }
 
     getToday() {

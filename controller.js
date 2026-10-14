@@ -45,7 +45,9 @@ class Controller {
     async findLocationByIp() {
         try {
             const location = await this.model.getData("https://ipapi.co/json/");
-            const locationName = location.city && location.region_code ? `${location.city}, ${location.region_code}` : location.city;
+            const locationName = location.city
+                ? this.model.formatLocationName(location.city, location.region_code)
+                : "";
             this.setLocation(location.latitude, location.longitude, location.timezone, locationName);
         } catch (error) {
             this.view.showWeatherError();
