@@ -1,42 +1,45 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="theme-color" content="#101820" />
-		<title>Digital Clock</title>
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
-		<link rel="stylesheet" href="src/styles.css" />
-	</head>
-	<body>
-		<div class="apod-backdrop" aria-hidden="true"></div>
-		<main class="clock-shell">
-			<section class="clock-panel" aria-labelledby="clock-title">
-				<div class="panel-header">
-					<p class="eyebrow">Local time</p>
-					<button class="icon-button" id="theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">◐</button>
-				</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="background"></div>
+    <div id="photo"></div>
 
-				<h1 id="clock-title">Digital clock</h1>
-				<p class="date" id="date">Loading date...</p>
+    <header>
+        <div class="toggle glass">
+            <input type="radio" name="format" id="hour12">
+            <label for="hour12">12h</label>
+            <input type="radio" name="format" id="hour24">
+            <label for="hour24">24h</label>
+        </div>
+    </header>
 
-				<div class="time" id="time" aria-live="polite">00:00:00</div>
-				<p class="timezone" id="timezone">Detecting timezone...</p>
+    <main>
+        <section id="clock-box" class="glass">
+            <p id="date"></p>
+            <h1 id="time"></h1>
+            <p id="time-zone"></p>
+        </section>
+    </main>
 
-				<div class="controls" aria-label="Clock controls">
-					<button class="control-button active" id="format-toggle" type="button">24-hour</button>
-					<button class="control-button" id="seconds-toggle" type="button" aria-pressed="true">Seconds on</button>
-				</div>
-			</section>
-		</main>
-		<aside class="apod-caption" id="apod-caption" aria-live="polite">
-			<span class="apod-label">NASA APOD</span>
-			<strong id="apod-title">Loading today's image...</strong>
-			<p id="apod-explanation"></p>
-		</aside>
-		<script src="config/secrets/nasa-config.js"></script>
-		<script src="src/app.js"></script>
-	</body>
+    <footer>
+        <section id="weather-box" class="glass">
+            <p class="small-title">Today's weather</p>
+        </section>
+
+        <section id="quote-box" class="glass">
+            <p class="small-title">NASA picture of the day</p>
+        </section>
+    </footer>
+
+    <script src="model.js"></script>
+    <script src="view.js"></script>
+    <script src="controller.js"></script>
+</body>
 </html>
