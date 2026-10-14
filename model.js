@@ -4,13 +4,20 @@ class Model {
         this.lat = null;
         this.lon = null;
         this.offset = 0;
-        this.timeZone = "";
+        this.timeZone = localStorage.getItem("timeZone") || "";
         this.picture = null;
+        this.weather = null;
+        this.locationName = "";
     }
 
     saveFormat(format) {
         this.format = format;
         localStorage.setItem("format", format);
+    }
+
+    saveTimeZone(timeZone) {
+        this.timeZone = timeZone;
+        localStorage.setItem("timeZone", timeZone);
     }
 
     async getData(url) {
@@ -22,14 +29,41 @@ class Model {
     }
 
     async loadTime() {
+        if (this.timeZone) {
+            return;
+        }
+
         const data = await this.getData(`https://timeapi.io/api/time/current/coordinate?latitude=${this.lat}&longitude=${this.lon}`);
-        const apiTime = new Date(data.year, data.month - 1, data.day, data.hour, data.minute, data.seconds);
-        this.offset = apiTime - Date.now();
         this.timeZone = data.timeZone;
     }
 
     getNow() {
-        return new Date(Date.now() + this.offset);
+        return new Date();
+    }
+
+    getTimeZone() {
+        return this.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+
+    async loadWeather() {
+        const data = await this.getData(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`);
+        this.weather = data.current;
+    }
+
+    async findTimeZone(city) {
+        const data = await this.getData(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
+        const result = data.results?.[0];
+        if (!result?.timezone) {
+            throw new Error("City not found");
+        }
+        return result.timezone;
+    }
+
+    async loadLocationName() {
+        const data = await this.getData(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${this.lat}&longitude=${this.lon}&localityLanguage=en`);
+        const city = data.city || data.locality || data.principalSubdivision;
+        const state = data.principalSubdivisionCode?.split("-").pop() || data.principalSubdivision;
+        this.locationName = city && state ? `${city}, ${state}` : city || "Current location";
     }
 
     getToday() {

@@ -67,6 +67,7 @@ header {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    align-items: center;
 }
 
 .toggle {
@@ -83,6 +84,27 @@ header {
     border-radius: 14px;
     font-size: 0.85rem;
     cursor: pointer;
+}
+
+.timezone-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    font-size: 0.75rem;
+}
+
+.timezone-control input {
+    width: 150px;
+    border: 0;
+    outline: 0;
+    color: white;
+    background: transparent;
+    font: inherit;
+}
+
+.timezone-control input::placeholder {
+    color: rgba(255, 255, 255, 0.65);
 }
 
 .toggle input:checked + label {
@@ -149,6 +171,29 @@ main {
     opacity: 0.75;
 }
 
+#weather-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 18px;
+}
+
+#weather-location {
+    margin-top: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+#weather-content strong {
+    font-size: 2rem;
+    font-weight: 400;
+}
+
+#weather-content span {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
 @media (max-width: 900px) {
     body {
         height: auto;
@@ -158,6 +203,7 @@ main {
 
     header {
         justify-content: center;
+        flex-wrap: wrap;
     }
 
     main {

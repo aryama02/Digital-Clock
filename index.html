@@ -18,6 +18,20 @@
             <input type="radio" name="format" id="hour24">
             <label for="hour24">24h</label>
         </div>
+        <label class="timezone-control glass" for="timezone-input">
+            <span>Timezone</span>
+            <input id="timezone-input" type="text" list="timezones" placeholder="Your local timezone">
+            <datalist id="timezones">
+                <option value="America/New_York"></option>
+                <option value="America/Chicago"></option>
+                <option value="America/Denver"></option>
+                <option value="America/Los_Angeles"></option>
+                <option value="Europe/London"></option>
+                <option value="Europe/Paris"></option>
+                <option value="Asia/Tokyo"></option>
+                <option value="Australia/Sydney"></option>
+            </datalist>
+        </label>
     </header>
 
     <main>
@@ -31,6 +45,8 @@
     <footer>
         <section id="weather-box" class="glass">
             <p class="small-title">Today's weather</p>
+            <p id="weather-location" aria-live="polite">Finding your location...</p>
+            <div id="weather-content" aria-live="polite">Finding your location...</div>
         </section>
 
         <section id="quote-box" class="glass">
