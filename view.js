@@ -4,12 +4,18 @@ class View {
         this.photo = document.getElementById("photo");
         this.hour12 = document.getElementById("hour12");
         this.hour24 = document.getElementById("hour24");
+        this.fahrenheit = document.getElementById("fahrenheit");
+        this.celsius = document.getElementById("celsius");
         this.date = document.getElementById("date");
         this.time = document.getElementById("time");
         this.timeZone = document.getElementById("time-zone");
         this.timeZoneInput = document.getElementById("timezone-input");
         this.weatherLocation = document.getElementById("weather-location");
         this.weather = document.getElementById("weather-content");
+        this.pomodoroDisplay = document.getElementById("pomodoro-display");
+        this.pomodoroMinutes = document.getElementById("pomodoro-minutes");
+        this.pomodoroStart = document.getElementById("pomodoro-start");
+        this.pomodoroReset = document.getElementById("pomodoro-reset");
         this.quoteBox = document.getElementById("quote-box");
         this.pictureDialog = document.getElementById("picture-dialog");
         this.closePicture = document.getElementById("close-picture");
@@ -27,6 +33,23 @@ class View {
         this.timeZoneInput.addEventListener("change", () => handler(this.timeZoneInput.value.trim()));
     }
 
+    bindUnit(handler) {
+        this.fahrenheit.addEventListener("change", () => handler("F"));
+        this.celsius.addEventListener("change", () => handler("C"));
+    }
+
+    bindPomodoro(startHandler, resetHandler) {
+        this.pomodoroStart.addEventListener("click", () => startHandler(Number(this.pomodoroMinutes.value)));
+        this.pomodoroReset.addEventListener("click", resetHandler);
+    }
+
+    showPomodoro(seconds, running) {
+        const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
+        const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
+        this.pomodoroDisplay.textContent = `${minutes}:${remainingSeconds}`;
+        this.pomodoroStart.textContent = running ? "Pause" : "Start";
+    }
+
     bindPicture(handler) {
         this.quoteBox.addEventListener("click", handler);
         this.quoteBox.addEventListener("keydown", event => {
@@ -41,6 +64,11 @@ class View {
     showFormat(format) {
         this.hour12.checked = format === "12";
         this.hour24.checked = format === "24";
+    }
+
+    showUnit(unit) {
+        this.fahrenheit.checked = unit === "F";
+        this.celsius.checked = unit === "C";
     }
 
     showTime(now, format, timeZone) {
@@ -70,7 +98,7 @@ class View {
         this.timeZone.textContent = timeZone.replaceAll("_", " ");
     }
 
-    showWeather(weather) {
+    showWeather(weather, unit) {
         const description = {
             0: "Clear sky",
             1: "Mainly clear",
@@ -84,7 +112,8 @@ class View {
             80: "Rain showers",
             95: "Thunderstorm"
         }[weather.weather_code] || "Changing conditions";
-        this.weather.innerHTML = `<strong>${Math.round(weather.temperature_2m)}&deg;F</strong><span>${description}</span><span>Humidity ${weather.relative_humidity_2m}% &middot; Wind ${Math.round(weather.wind_speed_10m)} mph</span>`;
+        const windUnit = unit === "C" ? "km/h" : "mph";
+        this.weather.innerHTML = `<strong>${Math.round(weather.temperature_2m)}&deg;${unit}</strong><span>${description}</span><span>Humidity ${weather.relative_humidity_2m}% &middot; Wind ${Math.round(weather.wind_speed_10m)} ${windUnit}</span>`;
     }
 
     showWeatherLocation(locationName) {

@@ -5,6 +5,12 @@ class Controller {
 
         this.view.showFormat(this.model.format);
         this.view.bindFormat(format => this.changeFormat(format));
+        this.view.showUnit(this.model.unit);
+        this.view.bindUnit(unit => this.changeUnit(unit));
+        this.pomodoroSeconds = 25 * 60;
+        this.pomodoroInterval = null;
+        this.view.bindPomodoro(minutes => this.togglePomodoro(minutes), () => this.resetPomodoro());
+        this.view.showPomodoro(this.pomodoroSeconds, false);
         this.view.bindTimeZone(timeZone => this.changeTimeZone(timeZone));
         this.view.bindPicture(() => this.showPictureDetails());
         this.view.showTimeZoneInput(localStorage.getItem("timeZone") || "");
@@ -72,7 +78,7 @@ class Controller {
             }
             this.view.showTimeZone(this.model.getTimeZone());
             this.view.showWeatherLocation(this.model.locationName);
-            this.view.showWeather(this.model.weather);
+            this.view.showWeather(this.model.weather, this.model.unit);
         } catch (error) {
             this.view.showTimeZone("Computer time");
             this.view.showWeatherError();
@@ -134,6 +140,55 @@ class Controller {
     changeFormat(format) {
         this.model.saveFormat(format);
         this.updateClock();
+    }
+
+    togglePomodoro(minutes) {
+        if (this.pomodoroInterval) {
+            clearInterval(this.pomodoroInterval);
+            this.pomodoroInterval = null;
+            this.view.showPomodoro(this.pomodoroSeconds, false);
+            return;
+        }
+
+        if (this.pomodoroSeconds <= 0 || this.pomodoroSeconds === 25 * 60) {
+            const selectedMinutes = Math.min(120, Math.max(1, minutes || 25));
+            this.pomodoroSeconds = selectedMinutes * 60;
+        }
+
+        this.pomodoroInterval = setInterval(() => this.tickPomodoro(), 1000);
+        this.view.showPomodoro(this.pomodoroSeconds, true);
+    }
+
+    tickPomodoro() {
+        this.pomodoroSeconds -= 1;
+        if (this.pomodoroSeconds <= 0) {
+            this.pomodoroSeconds = 0;
+            clearInterval(this.pomodoroInterval);
+            this.pomodoroInterval = null;
+        }
+        this.view.showPomodoro(this.pomodoroSeconds, Boolean(this.pomodoroInterval));
+    }
+
+    resetPomodoro() {
+        clearInterval(this.pomodoroInterval);
+        this.pomodoroInterval = null;
+        const selectedMinutes = Math.min(120, Math.max(1, Number(this.view.pomodoroMinutes.value) || 25));
+        this.pomodoroSeconds = selectedMinutes * 60;
+        this.view.showPomodoro(this.pomodoroSeconds, false);
+    }
+
+    async changeUnit(unit) {
+        this.model.saveUnit(unit);
+        if (!this.model.lat || !this.model.lon) {
+            return;
+        }
+
+        try {
+            await this.model.loadWeather();
+            this.view.showWeather(this.model.weather, this.model.unit);
+        } catch (error) {
+            this.view.showWeatherError();
+        }
     }
 }
 

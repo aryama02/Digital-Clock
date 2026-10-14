@@ -18,6 +18,12 @@
             <input type="radio" name="format" id="hour24">
             <label for="hour24">24h</label>
         </div>
+        <div class="toggle glass">
+            <input type="radio" name="temperature" id="fahrenheit">
+            <label for="fahrenheit">&deg;F</label>
+            <input type="radio" name="temperature" id="celsius">
+            <label for="celsius">&deg;C</label>
+        </div>
         <label class="timezone-control glass" for="timezone-input">
             <span>Timezone</span>
             <input id="timezone-input" type="text" list="timezones" placeholder="Your local timezone">
@@ -47,6 +53,17 @@
             <p class="small-title">Today's weather</p>
             <p id="weather-location" aria-live="polite">Finding your location...</p>
             <div id="weather-content" aria-live="polite">Finding your location...</div>
+        </section>
+
+        <section id="pomodoro-box" class="glass">
+            <p class="small-title">Study timer</p>
+            <div id="pomodoro-display" aria-live="polite">25:00</div>
+            <label for="pomodoro-minutes">Minutes</label>
+            <input id="pomodoro-minutes" type="number" min="1" max="120" value="25">
+            <div class="pomodoro-actions">
+                <button id="pomodoro-start" type="button">Start</button>
+                <button id="pomodoro-reset" type="button">Reset</button>
+            </div>
         </section>
 
         <section id="quote-box" class="glass" role="button" tabindex="0" aria-controls="picture-dialog">

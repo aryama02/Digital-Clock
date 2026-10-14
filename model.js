@@ -1,6 +1,7 @@
 class Model {
     constructor() {
         this.format = localStorage.getItem("format") || "12";
+        this.unit = localStorage.getItem("temperatureUnit") || "F";
         this.lat = null;
         this.lon = null;
         this.offset = 0;
@@ -18,6 +19,11 @@ class Model {
     saveTimeZone(timeZone) {
         this.timeZone = timeZone;
         localStorage.setItem("timeZone", timeZone);
+    }
+
+    saveUnit(unit) {
+        this.unit = unit;
+        localStorage.setItem("temperatureUnit", unit);
     }
 
     async getData(url) {
@@ -46,7 +52,9 @@ class Model {
     }
 
     async loadWeather() {
-        const data = await this.getData(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`);
+        const temperatureUnit = this.unit === "C" ? "celsius" : "fahrenheit";
+        const windUnit = this.unit === "C" ? "kmh" : "mph";
+        const data = await this.getData(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=${temperatureUnit}&wind_speed_unit=${windUnit}`);
         this.weather = data.current;
     }
 
