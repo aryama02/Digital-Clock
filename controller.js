@@ -6,6 +6,7 @@ class Controller {
         this.view.showFormat(this.model.format);
         this.view.bindFormat(format => this.changeFormat(format));
         this.view.bindTimeZone(timeZone => this.changeTimeZone(timeZone));
+        this.view.bindPicture(() => this.showPictureDetails());
         this.view.showTimeZoneInput(localStorage.getItem("timeZone") || "");
 
         this.updateClock();
@@ -116,8 +117,18 @@ class Controller {
     }
 
     async loadPicture() {
-        await this.model.loadPicture();
-        this.view.showPicture(this.model.picture);
+        try {
+            await this.model.loadPicture();
+            this.view.showPicture(this.model.picture);
+        } catch (error) {
+            this.view.showPictureError();
+        }
+    }
+
+    showPictureDetails() {
+        if (this.model.picture) {
+            this.view.showPictureDetails(this.model.picture);
+        }
     }
 
     changeFormat(format) {

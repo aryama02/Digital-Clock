@@ -49,10 +49,19 @@
             <div id="weather-content" aria-live="polite">Finding your location...</div>
         </section>
 
-        <section id="quote-box" class="glass">
-            <p class="small-title">NASA picture of the day</p>
+        <section id="quote-box" class="glass" role="button" tabindex="0" aria-controls="picture-dialog">
+            <p class="small-title">Explore today's picture</p>
+            <p id="picture-prompt">Click to discover the story behind it</p>
         </section>
     </footer>
+
+    <dialog id="picture-dialog" class="glass">
+        <button id="close-picture" type="button" aria-label="Close picture information">&times;</button>
+        <p class="small-title">Today's space story</p>
+        <h2 id="picture-title"></h2>
+        <p id="picture-explanation"></p>
+        <a id="picture-source" href="#" target="_blank" rel="noopener">Read more from NASA</a>
+    </dialog>
 
     <script src="model.js"></script>
     <script src="view.js"></script>

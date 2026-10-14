@@ -76,7 +76,7 @@ class Model {
     async loadPicture() {
         const today = this.getToday();
         const saved = JSON.parse(localStorage.getItem("background"));
-        if (saved && saved.date === today) {
+        if (saved && saved.date === today && saved.explanation) {
             this.picture = saved;
             return;
         }
@@ -87,7 +87,10 @@ class Model {
 
         this.picture = {
             date: latest.date,
-            image: latest.hdurl.split("?")[0] + "?w=2560"
+            image: latest.hdurl.split("?")[0] + "?w=2560",
+            title: latest.title || "Today's picture",
+            explanation: latest.explanation || "NASA has not provided a description for this picture yet.",
+            source: latest.permalink || "https://science.nasa.gov/solar-system/"
         };
         localStorage.setItem("background", JSON.stringify(this.picture));
     }

@@ -10,6 +10,12 @@ class View {
         this.timeZoneInput = document.getElementById("timezone-input");
         this.weatherLocation = document.getElementById("weather-location");
         this.weather = document.getElementById("weather-content");
+        this.quoteBox = document.getElementById("quote-box");
+        this.pictureDialog = document.getElementById("picture-dialog");
+        this.closePicture = document.getElementById("close-picture");
+        this.pictureTitle = document.getElementById("picture-title");
+        this.pictureExplanation = document.getElementById("picture-explanation");
+        this.pictureSource = document.getElementById("picture-source");
     }
 
     bindFormat(handler) {
@@ -19,6 +25,17 @@ class View {
 
     bindTimeZone(handler) {
         this.timeZoneInput.addEventListener("change", () => handler(this.timeZoneInput.value.trim()));
+    }
+
+    bindPicture(handler) {
+        this.quoteBox.addEventListener("click", handler);
+        this.quoteBox.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handler();
+            }
+        });
+        this.closePicture.addEventListener("click", () => this.pictureDialog.close());
     }
 
     showFormat(format) {
@@ -80,6 +97,7 @@ class View {
     }
 
     showPicture(picture) {
+        this.pictureTitle.textContent = picture.title;
         const image = new Image();
         image.onload = () => {
             this.background.style.backgroundImage = `url("${picture.image}")`;
@@ -88,5 +106,16 @@ class View {
             this.photo.classList.add("show");
         };
         image.src = picture.image;
+    }
+
+    showPictureDetails(picture) {
+        this.pictureTitle.textContent = picture.title;
+        this.pictureExplanation.innerHTML = picture.explanation;
+        this.pictureSource.href = picture.source;
+        this.pictureDialog.showModal();
+    }
+
+    showPictureError() {
+        document.getElementById("picture-prompt").textContent = "Picture details unavailable";
     }
 }

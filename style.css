@@ -162,6 +162,65 @@ main {
     width: 380px;
     height: 200px;
     padding: 20px 22px;
+    cursor: pointer;
+}
+
+#quote-box:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 4px;
+}
+
+#picture-prompt {
+    margin-top: 28px;
+    max-width: 260px;
+    font-size: 1.25rem;
+    line-height: 1.25;
+}
+
+#picture-dialog {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    width: min(560px, calc(100% - 32px));
+    padding: 28px;
+    color: white;
+    background-color: rgba(15, 18, 30, 0.92);
+    transform: translate(-50%, -50%);
+}
+
+#picture-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(5px);
+}
+
+#close-picture {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    border: 0;
+    color: white;
+    background: transparent;
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+
+#picture-title {
+    margin: 14px 32px 16px 0;
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+#picture-explanation {
+    max-height: 45vh;
+    overflow: auto;
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+#picture-source {
+    display: inline-block;
+    margin-top: 22px;
+    color: white;
+    text-underline-offset: 4px;
 }
 
 .small-title {
