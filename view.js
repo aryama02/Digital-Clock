@@ -188,7 +188,7 @@ class View {
         this.timerBox.classList.add("done");
     }
 
-    showPicture(pictures, selected) {
+    showPicture(pictures, selected, today) {
         const picture = pictures[selected];
         this.background.style.backgroundImage = `url("${picture.image}")`;
         this.pictureTitle.textContent = picture.title;
@@ -196,8 +196,11 @@ class View {
         this.pictureCredit.textContent = "Image credit: " + picture.credit;
 
         for (let i = 0; i < this.dayButtons.length; i++) {
-            const date = new Date(pictures[i].date + "T00:00");
-            this.dayButtons[i].textContent = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            let label = new Date(pictures[i].date + "T00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            if (pictures[i].date === today) {
+                label = "Today";
+            }
+            this.dayButtons[i].textContent = label;
             this.dayButtons[i].className = "day-button";
         }
         this.dayButtons[selected].className = "day-button active";

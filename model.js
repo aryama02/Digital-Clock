@@ -19,6 +19,11 @@ class Model {
         localStorage.setItem(name, value);
     }
 
+    setLocation(lat, lon) {
+        this.lat = lat;
+        this.lon = lon;
+    }
+
     async getData(url) {
         const response = await fetch(url);
         if (!response.ok) {
@@ -103,7 +108,7 @@ class Model {
         }
 
         const dateCode = today.slice(2).replaceAll("-", "");
-        const data = await this.getData("https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=5&date_to=" + dateCode);
+        const data = await this.getData("https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=10&date_to=" + dateCode);
 
         this.pictures = [];
         for (const item of data) {
@@ -127,9 +132,17 @@ class Model {
         return text.split("Tomorrow's picture")[0].trim();
     }
 
+    selectPicture(index) {
+        this.selected = index;
+    }
+
     startTimer(minutes) {
         this.timerTotal = minutes * 60;
         this.timerLeft = this.timerTotal;
+    }
+
+    tickTimer() {
+        this.timerLeft = this.timerLeft - 1;
     }
 
     resetTimer() {

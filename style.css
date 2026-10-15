@@ -308,7 +308,7 @@ main {
     opacity: 0.75;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1220px) {
     body {
         height: auto;
         overflow: auto;

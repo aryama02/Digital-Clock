@@ -36,21 +36,21 @@
     <main>
         <section id="clock-box" class="glass">
             <p id="date"></p>
-            <h1 id="time"></h1>
+            <h1 id="time">--:--</h1>
             <p id="time-zone"></p>
             <p id="sky"></p>
         </section>
     </main>
 
-    <section id="weather-box" class="glass">
+    <div id="weather-box" class="glass">
         <p class="small-title">Today's weather</p>
         <p id="temperature">--°</p>
         <p id="condition">Finding your location...</p>
         <p id="feels-like">Feels like -- · Rain chance --</p>
         <p id="humidity">Humidity -- · Wind --</p>
-    </section>
+    </div>
 
-    <section id="timer-box" class="glass">
+    <div id="timer-box" class="glass">
         <p class="small-title">Study timer</p>
         <p id="timer-display">25:00</p>
         <label for="timer-minutes">Minutes</label>
@@ -60,11 +60,11 @@
             <button id="reset-button">Reset</button>
         </div>
         <div id="timer-bar"></div>
-    </section>
+    </div>
 
-    <section id="quote-box" class="glass">
+    <div id="quote-box" class="glass">
         <p class="small-title" id="picture-prompt">Explore today's picture</p>
-    </section>
+    </div>
 
     <dialog id="picture-dialog" class="glass">
         <button id="close-picture">&times;</button>
@@ -74,7 +74,7 @@
             <button class="day-button"></button>
             <button class="day-button"></button>
         </div>
-        <h2 id="picture-title"></h2>
+        <h2 id="picture-title">Loading...</h2>
         <p id="picture-text"></p>
         <p id="picture-credit"></p>
     </dialog>

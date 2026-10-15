@@ -25,8 +25,7 @@ class Controller {
     refresh() {
         this.loadPicture();
         navigator.geolocation.getCurrentPosition(position => {
-            this.model.lat = position.coords.latitude;
-            this.model.lon = position.coords.longitude;
+            this.model.setLocation(position.coords.latitude, position.coords.longitude);
             this.loadTimeAndWeather();
         }, () => {
             this.view.showWeatherMessage("Allow location to see the weather");
@@ -60,15 +59,15 @@ class Controller {
     async loadPicture() {
         try {
             await this.model.loadPictures();
-            this.view.showPicture(this.model.pictures, this.model.selected);
+            this.view.showPicture(this.model.pictures, this.model.selected, this.model.getToday());
         } catch (error) {
             this.view.showPictureError();
         }
     }
 
     chooseDay(index) {
-        this.model.selected = index;
-        this.view.showPicture(this.model.pictures, index);
+        this.model.selectPicture(index);
+        this.view.showPicture(this.model.pictures, index, this.model.getToday());
     }
 
     changeBrightness(value) {
@@ -105,7 +104,7 @@ class Controller {
     }
 
     tickTimer() {
-        this.model.timerLeft = this.model.timerLeft - 1;
+        this.model.tickTimer();
         this.showTimer();
         if (this.model.timerLeft === 0) {
             clearInterval(this.timer);
