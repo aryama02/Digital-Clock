@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -34,7 +35,7 @@
     </header>
 
     <main>
-        <section id="clock-box" class="glass">
+        <section id="clock-box" class="glass has-text-centered">
             <p id="date"></p>
             <h1 id="time">--:--</h1>
             <p id="time-zone"></p>
@@ -43,7 +44,7 @@
     </main>
 
     <div id="weather-box" class="glass">
-        <p class="small-title">Today's weather</p>
+        <p class="small-title is-size-7 is-uppercase">Today's weather</p>
         <p id="temperature">--°</p>
         <p id="condition">Finding your location...</p>
         <p id="feels-like">Feels like -- · Rain chance --</p>
@@ -51,30 +52,30 @@
     </div>
 
     <div id="timer-box" class="glass">
-        <p class="small-title">Study timer</p>
+        <p class="small-title is-size-7 is-uppercase">Study timer</p>
         <p id="timer-display">25:00</p>
         <label for="timer-minutes">Minutes</label>
-        <input type="number" id="timer-minutes" min="1" max="120" value="25">
+        <input type="number" id="timer-minutes" class="input is-small" min="1" max="120" value="25">
         <div class="timer-buttons">
-            <button id="start-button">Start</button>
-            <button id="reset-button">Reset</button>
+            <button id="start-button" class="button is-small is-white is-outlined">Start</button>
+            <button id="reset-button" class="button is-small is-white is-outlined">Reset</button>
         </div>
         <div id="timer-bar"></div>
     </div>
 
     <div id="quote-box" class="glass">
-        <p class="small-title" id="picture-prompt">Explore today's picture</p>
+        <p class="small-title is-size-7 is-uppercase" id="picture-prompt">Explore today's picture</p>
     </div>
 
     <dialog id="picture-dialog" class="glass">
-        <button id="close-picture">&times;</button>
-        <p class="small-title">NASA space story</p>
-        <div id="day-buttons">
-            <button class="day-button"></button>
-            <button class="day-button"></button>
-            <button class="day-button"></button>
+        <button id="close-picture" class="delete is-medium"></button>
+        <p class="small-title is-size-7 is-uppercase">NASA space story</p>
+        <div id="day-buttons" class="buttons mt-3">
+            <button class="button is-small is-rounded is-white is-outlined"></button>
+            <button class="button is-small is-rounded is-white is-outlined"></button>
+            <button class="button is-small is-rounded is-white is-outlined"></button>
         </div>
-        <h2 id="picture-title">Loading...</h2>
+        <h2 id="picture-title" class="title is-4 has-text-white has-text-weight-normal">Loading...</h2>
         <p id="picture-text"></p>
         <p id="picture-credit"></p>
     </dialog>

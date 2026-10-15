@@ -31,7 +31,7 @@ class View {
         this.pictureText = document.getElementById("picture-text");
         this.pictureCredit = document.getElementById("picture-credit");
         this.picturePrompt = document.getElementById("picture-prompt");
-        this.dayButtons = document.querySelectorAll(".day-button");
+        this.dayButtons = document.querySelectorAll("#day-buttons .button");
     }
 
     bindSettings(handler) {
@@ -201,9 +201,9 @@ class View {
                 label = "Today";
             }
             this.dayButtons[i].textContent = label;
-            this.dayButtons[i].className = "day-button";
+            this.dayButtons[i].className = "button is-small is-rounded is-white is-outlined";
         }
-        this.dayButtons[selected].className = "day-button active";
+        this.dayButtons[selected].className = "button is-small is-rounded is-white";
     }
 
     showPictureError() {

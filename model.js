@@ -59,7 +59,7 @@ class Model {
         const data = await this.getData(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}` +
             "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m" +
             "&daily=precipitation_probability_max,sunrise,sunset&forecast_days=1" +
-            `&timezone=auto&temperature_unit=${this.unit}&wind_speed_unit=${windUnit}`);
+            `&timezone=${this.timeZone || "auto"}&temperature_unit=${this.unit}&wind_speed_unit=${windUnit}`);
 
         this.weather = {
             temperature: Math.round(data.current.temperature_2m),
