@@ -1,82 +1,18 @@
-# Space Clock
+clock website for our project. it shows the time and weather for ur location and the nasa picture of the day is the background
 
-Space Clock is a browser-based digital clock with a space-themed background. It
-shows the current time, local weather, and NASA's picture of the day. We built
-it as a small web development project to practice working with APIs, browser
-features, and the MVC pattern.
+settings button on the top right has brightness (so u can leave it on as a display), 12h/24h and F/C. all the settings get saved in local storage
 
-Live site: [aryy.me/Digital-Clock](http://aryy.me/Digital-Clock/)
+on the left theres the weather, a study timer with a bar that goes down while it runs, and a box u click to read about todays nasa picture. in there u can also switch to the pictures from the last 3 days
 
-## What it does
+apis we used
+timeapi.io for the time and timezone
+open-meteo for the weather
+nasa apod for the picture (the old api.nasa.gov one is broken rn it only gives the nasa logo lol so we used the new one from science.nasa.gov)
 
-- Shows the current date and time
-- Supports both 12-hour and 24-hour formats
-- Finds the user's approximate location
-- Shows current weather for that location
-- Supports Fahrenheit and Celsius
-- Lets the user enter a different time zone
-- Uses NASA's picture of the day as the background
-- Includes a study timer based on the Pomodoro technique
-- Remembers display preferences using browser local storage
+how they work together: ur location goes to the time api and the weather api. the time from the time api and the sunset/sunrise + clouds from the weather api make the line under the clock (like clouds might hide the stars tonight). the date from the time api picks which nasa picture to show
 
-## How we built it
+code is split into model.js view.js controller.js for the mvc part
 
-The project uses plain HTML, CSS, and JavaScript. We kept the JavaScript
-separated using a simple Model-View-Controller structure:
+to run it just open index.html and press allow for location
 
-- `model.js` handles application data, API requests, saved preferences, and
-  information about the weather, time zone, and NASA picture.
-- `view.js` handles the page elements and updates what the user sees.
-- `controller.js` connects the model and the view. It responds to user actions,
-  starts the clock updates, and coordinates the API calls.
-
-The page gets the user's location through the browser's Geolocation API after
-the user gives permission. The latitude and longitude are used to request
-weather and time-zone information. If location access is denied or unavailable,
-the app uses an IP-based location service as a less precise fallback.
-
-We use the `Intl.DateTimeFormat` browser API to display the time in the selected
-time zone. This lets the browser handle time-zone rules and daylight-saving
-changes instead of calculating the offsets ourselves.
-
-## APIs and services
-
-- Open-Meteo for weather and city/time-zone lookups
-- NASA's space science website for the picture of the day
-- TimeAPI for time-zone information based on coordinates
-- BigDataCloud for reverse location lookup
-- ipapi.co as a fallback when browser geolocation is unavailable
-
-The app sends location coordinates to the services needed to provide weather,
-location, and time-zone information. The browser asks the user for permission
-before providing the location.
-
-## Running it locally
-
-The project does not need a build step. To run it locally:
-
-1. Download or clone the repository.
-2. Open `index.html` in a browser.
-3. Allow location access when the browser asks for it.
-
-Some browser features and API requests may work more reliably when the project
-is opened through a local development server instead of directly from a file.
-
-## Project files
-
-```text
-Digital-Clock/
-├── index.html
-├── style.css
-├── model.js
-├── view.js
-├── controller.js
-├── config/
-└── README.md
-```
-
-## Possible improvements
-
-Some things we could add later include better loading states, more detailed
-weather information, automated tests, and a more robust fallback when an
-external API is unavailable.
+live site: http://aryy.me/Digital-Clock
