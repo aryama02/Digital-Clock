@@ -1,29 +1,22 @@
 class Model {
     constructor() {
         this.format = localStorage.getItem("format") || "12";
-        this.unit = localStorage.getItem("temperatureUnit") || "F";
+        this.unit = localStorage.getItem("unit") || "fahrenheit";
+        this.brightness = localStorage.getItem("brightness") || 100;
         this.lat = null;
         this.lon = null;
         this.offset = 0;
-        this.timeZone = localStorage.getItem("timeZone") || "";
-        this.picture = null;
+        this.timeZone = "";
         this.weather = null;
-        this.locationName = "";
+        this.pictures = [];
+        this.selected = 0;
+        this.timerTotal = 0;
+        this.timerLeft = 0;
     }
 
-    saveFormat(format) {
-        this.format = format;
-        localStorage.setItem("format", format);
-    }
-
-    saveTimeZone(timeZone) {
-        this.timeZone = timeZone;
-        localStorage.setItem("timeZone", timeZone);
-    }
-
-    saveUnit(unit) {
-        this.unit = unit;
-        localStorage.setItem("temperatureUnit", unit);
+    save(name, value) {
+        this[name] = value;
+        localStorage.setItem(name, value);
     }
 
     async getData(url) {
@@ -35,51 +28,14 @@ class Model {
     }
 
     async loadTime() {
-        if (this.timeZone) {
-            return;
-        }
-
         const data = await this.getData(`https://timeapi.io/api/time/current/coordinate?latitude=${this.lat}&longitude=${this.lon}`);
+        const apiTime = new Date(data.year, data.month - 1, data.day, data.hour, data.minute, data.seconds);
+        this.offset = apiTime - Date.now();
         this.timeZone = data.timeZone;
     }
 
     getNow() {
-        return new Date();
-    }
-
-    getTimeZone() {
-        return this.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    }
-
-    async loadWeather() {
-        const temperatureUnit = this.unit === "C" ? "celsius" : "fahrenheit";
-        const windUnit = this.unit === "C" ? "kmh" : "mph";
-        const data = await this.getData(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=${temperatureUnit}&wind_speed_unit=${windUnit}`);
-        this.weather = data.current;
-    }
-
-    async findTimeZone(city) {
-        const data = await this.getData(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
-        const result = data.results?.[0];
-        if (!result?.timezone) {
-            throw new Error("City not found");
-        }
-        return result.timezone;
-    }
-
-    formatLocationName(locationName, stateCode = "") {
-        const city = locationName
-            .trim()
-            .replace(/^(?:township|town|city|village)\s+of\s+/i, "")
-            .replace(/\s+(?:township|town|city|village)$/i, "");
-        return stateCode ? `${city}, ${stateCode.toUpperCase()}` : city;
-    }
-
-    async loadLocationName() {
-        const data = await this.getData(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${this.lat}&longitude=${this.lon}&localityLanguage=en`);
-        const city = data.city || data.locality || data.principalSubdivision;
-        const stateCode = data.principalSubdivisionCode?.split("-").pop() || "";
-        this.locationName = city ? this.formatLocationName(city, stateCode) : "Current location";
+        return new Date(Date.now() + this.offset);
     }
 
     getToday() {
@@ -89,25 +45,102 @@ class Model {
         return now.getFullYear() + "-" + month + "-" + day;
     }
 
-    async loadPicture() {
+    async loadWeather() {
+        let windUnit = "kmh";
+        if (this.unit === "fahrenheit") {
+            windUnit = "mph";
+        }
+
+        const data = await this.getData(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}` +
+            "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m" +
+            "&daily=precipitation_probability_max,sunrise,sunset&forecast_days=1" +
+            `&timezone=auto&temperature_unit=${this.unit}&wind_speed_unit=${windUnit}`);
+
+        this.weather = {
+            temperature: Math.round(data.current.temperature_2m),
+            feelsLike: Math.round(data.current.apparent_temperature),
+            humidity: data.current.relative_humidity_2m,
+            wind: Math.round(data.current.wind_speed_10m),
+            code: data.current.weather_code,
+            rain: data.daily.precipitation_probability_max[0] || 0,
+            sunrise: data.daily.sunrise[0].slice(11),
+            sunset: data.daily.sunset[0].slice(11)
+        };
+    }
+
+    getWeatherText() {
+        const code = this.weather.code;
+        if (code === 0) return "Clear sky";
+        if (code === 1) return "Mostly clear";
+        if (code === 2) return "Partly cloudy";
+        if (code === 3) return "Cloudy";
+        if (code <= 48) return "Foggy";
+        if (code <= 57) return "Drizzle";
+        if (code <= 67) return "Rain";
+        if (code <= 77) return "Snow";
+        if (code <= 82) return "Rain showers";
+        if (code <= 86) return "Snow showers";
+        return "Thunderstorms";
+    }
+
+    getSky() {
+        const now = this.getNow();
+        const time = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+        return {
+            isDay: time >= this.weather.sunrise && time < this.weather.sunset,
+            isClear: this.weather.code <= 1,
+            sunrise: this.weather.sunrise,
+            sunset: this.weather.sunset
+        };
+    }
+
+    async loadPictures() {
         const today = this.getToday();
-        const saved = JSON.parse(localStorage.getItem("background"));
-        if (saved && saved.date === today && saved.explanation) {
-            this.picture = saved;
+        const saved = JSON.parse(localStorage.getItem("pictures"));
+        if (saved && saved[0].date === today) {
+            this.pictures = saved;
             return;
         }
 
         const dateCode = today.slice(2).replaceAll("-", "");
         const data = await this.getData("https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=5&date_to=" + dateCode);
-        const latest = data.find(item => item.media_type === "image" && item.hdurl);
 
-        this.picture = {
-            date: latest.date,
-            image: latest.hdurl.split("?")[0] + "?w=2560",
-            title: latest.title || "Today's picture",
-            explanation: latest.explanation || "NASA has not provided a description for this picture yet.",
-            source: latest.permalink || "https://science.nasa.gov/solar-system/"
-        };
-        localStorage.setItem("background", JSON.stringify(this.picture));
+        this.pictures = [];
+        for (const item of data) {
+            if (item.media_type === "image" && item.hdurl && this.pictures.length < 3) {
+                this.pictures.push({
+                    date: item.date,
+                    title: item.title,
+                    text: this.cleanText(item.explanation),
+                    credit: this.cleanText(item.credit),
+                    image: item.hdurl.split("?")[0] + "?w=2560"
+                });
+            }
+        }
+        this.selected = 0;
+        localStorage.setItem("pictures", JSON.stringify(this.pictures));
+    }
+
+    cleanText(html) {
+        const page = new DOMParser().parseFromString(html, "text/html");
+        const text = page.body.textContent.replace("Explanation:", "");
+        return text.split("Tomorrow's picture")[0].trim();
+    }
+
+    startTimer(minutes) {
+        this.timerTotal = minutes * 60;
+        this.timerLeft = this.timerTotal;
+    }
+
+    resetTimer() {
+        this.timerTotal = 0;
+        this.timerLeft = 0;
+    }
+
+    getTimerPercent() {
+        if (this.timerTotal === 0) {
+            return 0;
+        }
+        return this.timerLeft / this.timerTotal * 100;
     }
 }

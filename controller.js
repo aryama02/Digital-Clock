@@ -2,18 +2,19 @@ class Controller {
     constructor(model, view) {
         this.model = model;
         this.view = view;
+        this.timer = null;
 
+        this.view.showBrightness(this.model.brightness);
         this.view.showFormat(this.model.format);
-        this.view.bindFormat(format => this.changeFormat(format));
         this.view.showUnit(this.model.unit);
+
+        this.view.bindSettings(() => this.view.toggleSettings());
+        this.view.bindBrightness(value => this.changeBrightness(value));
+        this.view.bindFormat(format => this.changeFormat(format));
         this.view.bindUnit(unit => this.changeUnit(unit));
-        this.pomodoroSeconds = 25 * 60;
-        this.pomodoroInterval = null;
-        this.view.bindPomodoro(minutes => this.togglePomodoro(minutes), () => this.resetPomodoro());
-        this.view.showPomodoro(this.pomodoroSeconds, false);
-        this.view.bindTimeZone(timeZone => this.changeTimeZone(timeZone));
-        this.view.bindPicture(() => this.showPictureDetails());
-        this.view.showTimeZoneInput(localStorage.getItem("timeZone") || "");
+        this.view.bindTimer(() => this.toggleTimer(), () => this.resetTimer());
+        this.view.bindPicture(() => this.view.togglePicture());
+        this.view.bindDays(index => this.chooseDay(index));
 
         this.updateClock();
         setInterval(() => this.updateClock(), 1000);
@@ -23,174 +24,105 @@ class Controller {
 
     refresh() {
         this.loadPicture();
-        this.findLocation();
+        navigator.geolocation.getCurrentPosition(position => {
+            this.model.lat = position.coords.latitude;
+            this.model.lon = position.coords.longitude;
+            this.loadTimeAndWeather();
+        }, () => {
+            this.view.showWeatherMessage("Allow location to see the weather");
+        });
     }
 
     updateClock() {
-        this.view.showTime(this.model.getNow(), this.model.format, this.model.getTimeZone());
+        this.view.showTime(this.model.getNow(), this.model.format);
     }
 
-    findLocation() {
-        if (navigator.geolocation) {
-            this.locationWatch = navigator.geolocation.watchPosition(
-                position => this.setLocation(position.coords.latitude, position.coords.longitude),
-                () => this.findLocationByIp(),
-                { enableHighAccuracy: false, maximumAge: 300000, timeout: 10000 }
-            );
-        } else {
-            this.findLocationByIp();
-        }
-    }
-
-    async findLocationByIp() {
-        try {
-            const location = await this.model.getData("https://ipapi.co/json/");
-            const locationName = location.city
-                ? this.model.formatLocationName(location.city, location.region_code)
-                : "";
-            this.setLocation(location.latitude, location.longitude, location.timezone, locationName);
-        } catch (error) {
-            this.view.showWeatherError();
-        }
-    }
-
-    async setLocation(latitude, longitude, timeZone = "", locationName = "") {
-        const moved = this.model.lat !== latitude || this.model.lon !== longitude;
-        this.model.lat = latitude;
-        this.model.lon = longitude;
-
-        if (locationName) {
-            this.model.locationName = locationName;
-        }
-
-        if (timeZone && !localStorage.getItem("timeZone")) {
-            this.model.saveTimeZone(timeZone);
-            this.view.showTimeZoneInput(timeZone);
-        }
-
-        if (!moved) {
-            return;
-        }
-
-        try {
-            await this.model.loadTime();
-            await this.model.loadWeather();
-            if (!locationName) {
-                await this.model.loadLocationName();
-            }
-            this.view.showTimeZone(this.model.getTimeZone());
-            this.view.showWeatherLocation(this.model.locationName);
-            this.view.showWeather(this.model.weather, this.model.unit);
-        } catch (error) {
-            this.view.showTimeZone("Computer time");
-            this.view.showWeatherError();
-        }
-    }
-
-    async loadTime() {
+    async loadTimeAndWeather() {
         try {
             await this.model.loadTime();
             this.view.showTimeZone(this.model.timeZone);
         } catch (error) {
             this.view.showTimeZone("Computer time");
         }
+        this.loadWeather();
     }
 
-    async changeTimeZone(timeZone) {
-        const aliases = {
-            mumbai: "Asia/Kolkata",
-            delhi: "Asia/Kolkata",
-            "new delhi": "Asia/Kolkata",
-            beijing: "Asia/Shanghai",
-            shanghai: "Asia/Shanghai",
-            moscow: "Europe/Moscow",
-            toronto: "America/Toronto",
-            vancouver: "America/Vancouver",
-            edmonton: "America/Edmonton"
-        };
-        let normalizedTimeZone = aliases[timeZone.toLowerCase()] || timeZone;
-
+    async loadWeather() {
         try {
-            if (!normalizedTimeZone.includes("/")) {
-                normalizedTimeZone = await this.model.findTimeZone(normalizedTimeZone);
-            }
-            new Intl.DateTimeFormat("en-US", { timeZone: normalizedTimeZone }).format();
-            this.model.saveTimeZone(normalizedTimeZone);
-            this.updateClock();
-            this.view.showTimeZone(normalizedTimeZone);
-            this.view.showTimeZoneInput(normalizedTimeZone);
+            await this.model.loadWeather();
+            this.view.showWeather(this.model.weather, this.model.getWeatherText(), this.model.unit);
+            this.view.showSky(this.model.getSky(), this.model.format);
         } catch (error) {
-            this.view.showTimeZone("Invalid timezone");
+            this.view.showWeatherMessage("Could not load the weather");
         }
     }
 
     async loadPicture() {
         try {
-            await this.model.loadPicture();
-            this.view.showPicture(this.model.picture);
+            await this.model.loadPictures();
+            this.view.showPicture(this.model.pictures, this.model.selected);
         } catch (error) {
             this.view.showPictureError();
         }
     }
 
-    showPictureDetails() {
-        if (this.model.picture) {
-            this.view.showPictureDetails(this.model.picture);
-        }
+    chooseDay(index) {
+        this.model.selected = index;
+        this.view.showPicture(this.model.pictures, index);
+    }
+
+    changeBrightness(value) {
+        this.model.save("brightness", value);
+        this.view.showBrightness(value);
     }
 
     changeFormat(format) {
-        this.model.saveFormat(format);
+        this.model.save("format", format);
         this.updateClock();
+        if (this.model.weather) {
+            this.view.showSky(this.model.getSky(), format);
+        }
     }
 
-    togglePomodoro(minutes) {
-        if (this.pomodoroInterval) {
-            clearInterval(this.pomodoroInterval);
-            this.pomodoroInterval = null;
-            this.view.showPomodoro(this.pomodoroSeconds, false);
-            return;
+    changeUnit(unit) {
+        this.model.save("unit", unit);
+        if (this.model.weather) {
+            this.loadWeather();
         }
-
-        if (this.pomodoroSeconds <= 0 || this.pomodoroSeconds === 25 * 60) {
-            const selectedMinutes = Math.min(120, Math.max(1, minutes || 25));
-            this.pomodoroSeconds = selectedMinutes * 60;
-        }
-
-        this.pomodoroInterval = setInterval(() => this.tickPomodoro(), 1000);
-        this.view.showPomodoro(this.pomodoroSeconds, true);
     }
 
-    tickPomodoro() {
-        this.pomodoroSeconds -= 1;
-        if (this.pomodoroSeconds <= 0) {
-            this.pomodoroSeconds = 0;
-            clearInterval(this.pomodoroInterval);
-            this.pomodoroInterval = null;
+    toggleTimer() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        } else {
+            if (this.model.timerLeft === 0) {
+                this.model.startTimer(this.view.getMinutes());
+            }
+            this.timer = setInterval(() => this.tickTimer(), 1000);
         }
-        this.view.showPomodoro(this.pomodoroSeconds, Boolean(this.pomodoroInterval));
+        this.showTimer();
     }
 
-    resetPomodoro() {
-        clearInterval(this.pomodoroInterval);
-        this.pomodoroInterval = null;
-        const selectedMinutes = Math.min(120, Math.max(1, Number(this.view.pomodoroMinutes.value) || 25));
-        this.pomodoroSeconds = selectedMinutes * 60;
-        this.view.showPomodoro(this.pomodoroSeconds, false);
+    tickTimer() {
+        this.model.timerLeft = this.model.timerLeft - 1;
+        this.showTimer();
+        if (this.model.timerLeft === 0) {
+            clearInterval(this.timer);
+            this.timer = null;
+            this.view.showTimerDone();
+        }
     }
 
-    async changeUnit(unit) {
-        this.model.saveUnit(unit);
-        if (!this.model.lat || !this.model.lon) {
-            return;
-        }
+    resetTimer() {
+        clearInterval(this.timer);
+        this.timer = null;
+        this.model.resetTimer();
+        this.view.showTimer(this.view.getMinutes() * 60, 0, false);
+    }
 
-        try {
-            await this.model.loadWeather();
-            this.view.showWeather(this.model.weather, this.model.unit);
-        } catch (error) {
-            this.view.showWeatherError();
-        }
+    showTimer() {
+        this.view.showTimer(this.model.timerLeft, this.model.getTimerPercent(), this.timer !== null);
     }
 }
 

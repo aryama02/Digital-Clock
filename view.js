@@ -1,7 +1,11 @@
 class View {
     constructor() {
         this.background = document.getElementById("background");
-        this.photo = document.getElementById("photo");
+        this.dim = document.getElementById("dim");
+        this.header = document.querySelector("header");
+        this.settingsButton = document.getElementById("settings-button");
+        this.closeButton = document.getElementById("close-button");
+        this.brightness = document.getElementById("brightness");
         this.hour12 = document.getElementById("hour12");
         this.hour24 = document.getElementById("hour24");
         this.fahrenheit = document.getElementById("fahrenheit");
@@ -9,19 +13,34 @@ class View {
         this.date = document.getElementById("date");
         this.time = document.getElementById("time");
         this.timeZone = document.getElementById("time-zone");
-        this.timeZoneInput = document.getElementById("timezone-input");
-        this.weatherLocation = document.getElementById("weather-location");
-        this.weather = document.getElementById("weather-content");
-        this.pomodoroDisplay = document.getElementById("pomodoro-display");
-        this.pomodoroMinutes = document.getElementById("pomodoro-minutes");
-        this.pomodoroStart = document.getElementById("pomodoro-start");
-        this.pomodoroReset = document.getElementById("pomodoro-reset");
+        this.sky = document.getElementById("sky");
+        this.temperature = document.getElementById("temperature");
+        this.condition = document.getElementById("condition");
+        this.feelsLike = document.getElementById("feels-like");
+        this.humidity = document.getElementById("humidity");
+        this.timerBox = document.getElementById("timer-box");
+        this.timerDisplay = document.getElementById("timer-display");
+        this.timerMinutes = document.getElementById("timer-minutes");
+        this.startButton = document.getElementById("start-button");
+        this.resetButton = document.getElementById("reset-button");
+        this.timerBar = document.getElementById("timer-bar");
         this.quoteBox = document.getElementById("quote-box");
         this.pictureDialog = document.getElementById("picture-dialog");
         this.closePicture = document.getElementById("close-picture");
         this.pictureTitle = document.getElementById("picture-title");
-        this.pictureExplanation = document.getElementById("picture-explanation");
-        this.pictureSource = document.getElementById("picture-source");
+        this.pictureText = document.getElementById("picture-text");
+        this.pictureCredit = document.getElementById("picture-credit");
+        this.picturePrompt = document.getElementById("picture-prompt");
+        this.dayButtons = document.querySelectorAll(".day-button");
+    }
+
+    bindSettings(handler) {
+        this.settingsButton.addEventListener("click", handler);
+        this.closeButton.addEventListener("click", handler);
+    }
+
+    bindBrightness(handler) {
+        this.brightness.addEventListener("input", () => handler(this.brightness.value));
     }
 
     bindFormat(handler) {
@@ -29,36 +48,42 @@ class View {
         this.hour24.addEventListener("change", () => handler("24"));
     }
 
-    bindTimeZone(handler) {
-        this.timeZoneInput.addEventListener("change", () => handler(this.timeZoneInput.value.trim()));
-    }
-
     bindUnit(handler) {
-        this.fahrenheit.addEventListener("change", () => handler("F"));
-        this.celsius.addEventListener("change", () => handler("C"));
+        this.fahrenheit.addEventListener("change", () => handler("fahrenheit"));
+        this.celsius.addEventListener("change", () => handler("celsius"));
     }
 
-    bindPomodoro(startHandler, resetHandler) {
-        this.pomodoroStart.addEventListener("click", () => startHandler(Number(this.pomodoroMinutes.value)));
-        this.pomodoroReset.addEventListener("click", resetHandler);
-    }
-
-    showPomodoro(seconds, running) {
-        const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
-        const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
-        this.pomodoroDisplay.textContent = `${minutes}:${remainingSeconds}`;
-        this.pomodoroStart.textContent = running ? "Pause" : "Start";
+    bindTimer(startHandler, resetHandler) {
+        this.startButton.addEventListener("click", startHandler);
+        this.resetButton.addEventListener("click", resetHandler);
     }
 
     bindPicture(handler) {
         this.quoteBox.addEventListener("click", handler);
-        this.quoteBox.addEventListener("keydown", event => {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                handler();
-            }
-        });
-        this.closePicture.addEventListener("click", () => this.pictureDialog.close());
+        this.closePicture.addEventListener("click", handler);
+    }
+
+    bindDays(handler) {
+        for (let i = 0; i < this.dayButtons.length; i++) {
+            this.dayButtons[i].addEventListener("click", () => handler(i));
+        }
+    }
+
+    toggleSettings() {
+        this.header.classList.toggle("open");
+    }
+
+    togglePicture() {
+        if (this.pictureDialog.open) {
+            this.pictureDialog.close();
+        } else {
+            this.pictureDialog.showModal();
+        }
+    }
+
+    showBrightness(value) {
+        this.brightness.value = value;
+        this.dim.style.opacity = (100 - value) / 100;
     }
 
     showFormat(format) {
@@ -67,84 +92,118 @@ class View {
     }
 
     showUnit(unit) {
-        this.fahrenheit.checked = unit === "F";
-        this.celsius.checked = unit === "C";
+        this.fahrenheit.checked = unit === "fahrenheit";
+        this.celsius.checked = unit === "celsius";
     }
 
-    showTime(now, format, timeZone) {
-        const parts = new Intl.DateTimeFormat("en-US", {
-            timeZone,
-            hour: "numeric",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: format === "12"
-        }).formatToParts(now).reduce((values, part) => {
-            values[part.type] = part.value;
-            return values;
-        }, {});
-        const hours = format === "12" ? parts.hour : parts.hour.padStart(2, "0");
-        const ending = format === "12" ? ` ${parts.dayPeriod}` : "";
-        const minutes = parts.minute;
-        const seconds = parts.second;
+    showTime(now, format) {
+        let hours = now.getHours();
+        let ending = "";
+        if (format === "12") {
+            ending = hours < 12 ? " AM" : " PM";
+            hours = hours % 12;
+            if (hours === 0) {
+                hours = 12;
+            }
+        } else {
+            hours = String(hours).padStart(2, "0");
+        }
+
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
         this.time.innerHTML = `${hours}:${minutes}<span>:${seconds}${ending}</span>`;
-        this.date.textContent = new Intl.DateTimeFormat("en-US", { timeZone, weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(now);
-    }
-
-    showTimeZoneInput(timeZone) {
-        this.timeZoneInput.value = timeZone;
+        this.date.textContent = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
     }
 
     showTimeZone(timeZone) {
         this.timeZone.textContent = timeZone.replaceAll("_", " ");
     }
 
-    showWeather(weather, unit) {
-        const description = {
-            0: "Clear sky",
-            1: "Mainly clear",
-            2: "Partly cloudy",
-            3: "Overcast",
-            45: "Foggy",
-            48: "Rime fog",
-            51: "Light drizzle",
-            61: "Rain",
-            71: "Snow",
-            80: "Rain showers",
-            95: "Thunderstorm"
-        }[weather.weather_code] || "Changing conditions";
-        const windUnit = unit === "C" ? "km/h" : "mph";
-        this.weather.innerHTML = `<strong>${Math.round(weather.temperature_2m)}&deg;${unit}</strong><span>${description}</span><span>Humidity ${weather.relative_humidity_2m}% &middot; Wind ${Math.round(weather.wind_speed_10m)} ${windUnit}</span>`;
+    formatTime(time, format) {
+        if (format === "24") {
+            return time;
+        }
+        let hours = Number(time.slice(0, 2));
+        const ending = hours < 12 ? " AM" : " PM";
+        hours = hours % 12;
+        if (hours === 0) {
+            hours = 12;
+        }
+        return hours + time.slice(2) + ending;
     }
 
-    showWeatherLocation(locationName) {
-        this.weatherLocation.textContent = locationName;
+    showSky(sky, format) {
+        const sunrise = this.formatTime(sky.sunrise, format);
+        const sunset = this.formatTime(sky.sunset, format);
+
+        if (sky.isDay && sky.isClear) {
+            this.sky.textContent = `Sunset at ${sunset}, clear skies tonight for stargazing`;
+        } else if (sky.isDay) {
+            this.sky.textContent = `Sunset at ${sunset}, clouds might hide the stars tonight`;
+        } else if (sky.isClear) {
+            this.sky.textContent = `Clear night, go look at the stars! Sunrise at ${sunrise}`;
+        } else {
+            this.sky.textContent = `Too cloudy for stars tonight. Sunrise at ${sunrise}`;
+        }
     }
 
-    showWeatherError() {
-        this.weatherLocation.textContent = "Location unavailable";
-        this.weather.textContent = "Weather unavailable";
+    showWeather(weather, text, unit) {
+        let letter = "C";
+        let windUnit = "km/h";
+        if (unit === "fahrenheit") {
+            letter = "F";
+            windUnit = "mph";
+        }
+
+        this.temperature.textContent = weather.temperature + "°" + letter;
+        this.condition.textContent = text;
+        this.feelsLike.textContent = `Feels like ${weather.feelsLike}° · Rain chance ${weather.rain}%`;
+        this.humidity.textContent = `Humidity ${weather.humidity}% · Wind ${weather.wind} ${windUnit}`;
     }
 
-    showPicture(picture) {
+    showWeatherMessage(message) {
+        this.condition.textContent = message;
+    }
+
+    getMinutes() {
+        const minutes = Math.round(this.timerMinutes.value);
+        if (minutes < 1) {
+            return 25;
+        }
+        return minutes;
+    }
+
+    showTimer(secondsLeft, percent, running) {
+        const minutes = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+        const seconds = String(secondsLeft % 60).padStart(2, "0");
+        this.timerDisplay.textContent = minutes + ":" + seconds;
+        this.timerBar.style.width = percent + "%";
+        this.startButton.textContent = running ? "Pause" : "Start";
+        this.timerBox.classList.remove("done");
+    }
+
+    showTimerDone() {
+        this.timerDisplay.textContent = "Good job!";
+        this.startButton.textContent = "Start";
+        this.timerBox.classList.add("done");
+    }
+
+    showPicture(pictures, selected) {
+        const picture = pictures[selected];
+        this.background.style.backgroundImage = `url("${picture.image}")`;
         this.pictureTitle.textContent = picture.title;
-        const image = new Image();
-        image.onload = () => {
-            this.background.style.backgroundImage = `url("${picture.image}")`;
-            this.photo.style.backgroundImage = `url("${picture.image}")`;
-            this.background.classList.add("show");
-            this.photo.classList.add("show");
-        };
-        image.src = picture.image;
-    }
+        this.pictureText.textContent = picture.text;
+        this.pictureCredit.textContent = "Image credit: " + picture.credit;
 
-    showPictureDetails(picture) {
-        this.pictureTitle.textContent = picture.title;
-        this.pictureExplanation.innerHTML = picture.explanation;
-        this.pictureSource.href = picture.source;
-        this.pictureDialog.showModal();
+        for (let i = 0; i < this.dayButtons.length; i++) {
+            const date = new Date(pictures[i].date + "T00:00");
+            this.dayButtons[i].textContent = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            this.dayButtons[i].className = "day-button";
+        }
+        this.dayButtons[selected].className = "day-button active";
     }
 
     showPictureError() {
-        document.getElementById("picture-prompt").textContent = "Picture details unavailable";
+        this.picturePrompt.textContent = "NASA picture not available";
     }
 }

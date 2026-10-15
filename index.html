@@ -4,40 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Clock</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="background"></div>
-    <div id="photo"></div>
 
     <header>
-        <div class="toggle glass">
-            <input type="radio" name="format" id="hour12">
-            <label for="hour12">12h</label>
-            <input type="radio" name="format" id="hour24">
-            <label for="hour24">24h</label>
+        <button id="settings-button" class="glass">Settings</button>
+        <div id="settings">
+            <div class="pill glass">
+                <label for="brightness">Brightness</label>
+                <input type="range" id="brightness" min="20" max="100">
+            </div>
+            <div class="toggle glass">
+                <input type="radio" name="format" id="hour12">
+                <label for="hour12">12h</label>
+                <input type="radio" name="format" id="hour24">
+                <label for="hour24">24h</label>
+            </div>
+            <div class="toggle glass">
+                <input type="radio" name="unit" id="fahrenheit">
+                <label for="fahrenheit">°F</label>
+                <input type="radio" name="unit" id="celsius">
+                <label for="celsius">°C</label>
+            </div>
+            <button id="close-button" class="glass">&times;</button>
         </div>
-        <div class="toggle glass">
-            <input type="radio" name="temperature" id="fahrenheit">
-            <label for="fahrenheit">&deg;F</label>
-            <input type="radio" name="temperature" id="celsius">
-            <label for="celsius">&deg;C</label>
-        </div>
-        <label class="timezone-control glass" for="timezone-input">
-            <span>Timezone</span>
-            <input id="timezone-input" type="text" list="timezones" placeholder="Your local timezone">
-            <datalist id="timezones">
-                <option value="America/New_York"></option>
-                <option value="America/Chicago"></option>
-                <option value="America/Denver"></option>
-                <option value="America/Los_Angeles"></option>
-                <option value="Europe/London"></option>
-                <option value="Europe/Paris"></option>
-                <option value="Asia/Tokyo"></option>
-                <option value="Australia/Sydney"></option>
-            </datalist>
-        </label>
     </header>
 
     <main>
@@ -45,40 +38,48 @@
             <p id="date"></p>
             <h1 id="time"></h1>
             <p id="time-zone"></p>
+            <p id="sky"></p>
         </section>
     </main>
 
-    <footer>
-        <section id="weather-box" class="glass">
-            <p class="small-title">Today's weather</p>
-            <p id="weather-location" aria-live="polite">Finding your location...</p>
-            <div id="weather-content" aria-live="polite">Finding your location...</div>
-        </section>
+    <section id="weather-box" class="glass">
+        <p class="small-title">Today's weather</p>
+        <p id="temperature">--°</p>
+        <p id="condition">Finding your location...</p>
+        <p id="feels-like">Feels like -- · Rain chance --</p>
+        <p id="humidity">Humidity -- · Wind --</p>
+    </section>
 
-        <section id="pomodoro-box" class="glass">
-            <p class="small-title">Study timer</p>
-            <div id="pomodoro-display" aria-live="polite">25:00</div>
-            <label for="pomodoro-minutes">Minutes</label>
-            <input id="pomodoro-minutes" type="number" min="1" max="120" value="25">
-            <div class="pomodoro-actions">
-                <button id="pomodoro-start" type="button">Start</button>
-                <button id="pomodoro-reset" type="button">Reset</button>
-            </div>
-        </section>
+    <section id="timer-box" class="glass">
+        <p class="small-title">Study timer</p>
+        <p id="timer-display">25:00</p>
+        <label for="timer-minutes">Minutes</label>
+        <input type="number" id="timer-minutes" min="1" max="120" value="25">
+        <div class="timer-buttons">
+            <button id="start-button">Start</button>
+            <button id="reset-button">Reset</button>
+        </div>
+        <div id="timer-bar"></div>
+    </section>
 
-        <section id="quote-box" class="glass" role="button" tabindex="0" aria-controls="picture-dialog">
-            <p class="small-title">Explore today's picture</p>
-            <p id="picture-prompt">Click to discover the story behind it</p>
-        </section>
-    </footer>
+    <section id="quote-box" class="glass">
+        <p class="small-title" id="picture-prompt">Explore today's picture</p>
+    </section>
 
     <dialog id="picture-dialog" class="glass">
-        <button id="close-picture" type="button" aria-label="Close picture information">&times;</button>
-        <p class="small-title">Today's space story</p>
+        <button id="close-picture">&times;</button>
+        <p class="small-title">NASA space story</p>
+        <div id="day-buttons">
+            <button class="day-button"></button>
+            <button class="day-button"></button>
+            <button class="day-button"></button>
+        </div>
         <h2 id="picture-title"></h2>
-        <p id="picture-explanation"></p>
-        <a id="picture-source" href="#" target="_blank" rel="noopener">Read more from NASA</a>
+        <p id="picture-text"></p>
+        <p id="picture-credit"></p>
     </dialog>
+
+    <div id="dim"></div>
 
     <script src="model.js"></script>
     <script src="view.js"></script>

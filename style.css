@@ -20,36 +20,32 @@ body {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-#background,
-#photo {
+button {
+    color: white;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+#background {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: -1;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transition: opacity 1.5s;
-}
-
-#background {
-    background-size: cover;
-    filter: blur(30px) brightness(0.6);
-    transform: scale(1.1);
-}
-
-#photo {
     background-size: cover;
     background-position: center;
+}
+
+#dim {
+    position: fixed;
+    top: 0;
     left: 0;
     width: 100%;
-}
-
-#background.show,
-#photo.show {
-    opacity: 1;
+    height: 100%;
+    background-color: black;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .glass {
@@ -66,11 +62,50 @@ body {
     border-color: rgba(255, 255, 255, 0.45);
 }
 
+.small-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.75;
+}
+
 header {
-    display: flex;
+    position: fixed;
+    top: 24px;
+    right: 24px;
+}
+
+header button {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+}
+
+#settings {
+    display: none;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 10px;
+}
+
+header.open #settings {
+    display: flex;
+}
+
+header.open #settings-button {
+    display: none;
+}
+
+.pill {
+    display: flex;
     align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    font-size: 0.85rem;
+}
+
+#brightness {
+    width: 130px;
+    accent-color: white;
 }
 
 .toggle {
@@ -87,27 +122,6 @@ header {
     border-radius: 14px;
     font-size: 0.85rem;
     cursor: pointer;
-}
-
-.timezone-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 12px;
-    font-size: 0.75rem;
-}
-
-.timezone-control input {
-    width: 150px;
-    border: 0;
-    outline: 0;
-    color: white;
-    background: transparent;
-    font: inherit;
-}
-
-.timezone-control input::placeholder {
-    color: rgba(255, 255, 255, 0.65);
 }
 
 .toggle input:checked + label {
@@ -144,192 +158,154 @@ main {
     font-weight: 400;
 }
 
-#time-zone {
+#time-zone,
+#sky {
     min-height: 1.5em;
     opacity: 0.85;
 }
 
-#weather-box {
-    position: fixed;
-    left: 24px;
-    top: 24px;
-    bottom: auto;
-    width: 300px;
-    height: 200px;
-    padding: 20px 22px;
+#sky {
+    margin-top: 10px;
+    font-size: 0.9rem;
 }
 
+#weather-box,
+#timer-box,
 #quote-box {
     position: fixed;
     left: 24px;
-    top: auto;
-    bottom: 24px;
     width: 300px;
-    height: 125px;
-    padding: 14px 16px;
-    cursor: pointer;
+    padding: 18px 20px;
 }
 
-#pomodoro-box {
-    position: fixed;
-    left: 24px;
-    top: 240px;
-    width: 300px;
-    padding: 16px;
+#weather-box {
+    top: 24px;
 }
 
-#pomodoro-display {
+#temperature {
+    margin-top: 12px;
+    font-size: 2rem;
+}
+
+#condition,
+#feels-like,
+#humidity {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+#timer-box {
+    top: 209px;
+}
+
+#timer-box.done {
+    outline: 2px solid #4caf50;
+}
+
+#timer-display {
     margin: 12px 0;
     font-size: 2.5rem;
     font-variant-numeric: tabular-nums;
 }
 
-#pomodoro-box label {
+#timer-box label {
     display: block;
     margin-bottom: 5px;
     font-size: 0.75rem;
     opacity: 0.75;
 }
 
-#pomodoro-minutes {
-    width: 100%;
-    padding: 7px 8px;
+#timer-minutes,
+.timer-buttons button,
+.day-button {
+    padding: 7px 10px;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 8px;
     color: white;
-    background: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
-.pomodoro-actions {
+#timer-minutes {
+    width: 100%;
+}
+
+.timer-buttons {
     display: flex;
     gap: 8px;
     margin-top: 10px;
 }
 
-.pomodoro-actions button {
+.timer-buttons button {
     flex: 1;
-    padding: 7px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 8px;
-    color: white;
-    background: rgba(255, 255, 255, 0.12);
+}
+
+#timer-bar {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 0;
+    height: 4px;
+    margin-top: 8px;
+    border-radius: 2px;
+    background-color: white;
+    transition: width 1s linear;
+}
+
+#quote-box {
+    bottom: 24px;
     cursor: pointer;
 }
 
-#quote-box:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 4px;
-}
-
-#picture-prompt {
-    margin-top: 14px;
-    max-width: 200px;
-    font-size: 0.95rem;
-    line-height: 1.25;
-}
-
 #picture-dialog {
-    position: fixed;
-    inset: 50% auto auto 50%;
-    width: min(560px, calc(100% - 32px));
+    width: 560px;
+    margin: auto;
     padding: 28px;
     color: white;
     background-color: rgba(15, 18, 30, 0.92);
-    transform: translate(-50%, -50%);
 }
 
 #picture-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.55);
 }
 
 #close-picture {
     position: absolute;
     top: 14px;
-    right: 16px;
-    border: 0;
-    color: white;
-    background: transparent;
+    right: 18px;
+    border: none;
+    background: none;
     font-size: 1.6rem;
-    cursor: pointer;
+}
+
+#day-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.day-button.active {
+    background-color: rgba(255, 255, 255, 0.35);
 }
 
 #picture-title {
-    margin: 14px 32px 16px 0;
+    margin: 12px 0;
     font-size: 1.5rem;
     font-weight: 400;
 }
 
-#picture-explanation {
+#picture-text {
     max-height: 45vh;
-    overflow: auto;
-    line-height: 1.6;
-    opacity: 0.9;
+    overflow-y: auto;
+    font-family: "Caveat", cursive;
+    font-size: 1.4rem;
+    line-height: 1.3;
 }
 
-#picture-source {
-    display: inline-block;
-    margin-top: 22px;
-    color: white;
-    text-underline-offset: 4px;
-}
-
-.small-title {
+#picture-credit {
+    margin-top: 14px;
     font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
     opacity: 0.75;
-}
-
-#weather-content {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 18px;
-}
-
-#weather-location {
-    margin-top: 10px;
-    font-size: 1rem;
-    font-weight: 500;
-}
-
-#weather-content strong {
-    font-size: 2rem;
-    font-weight: 400;
-}
-
-#weather-content span {
-    font-size: 0.85rem;
-    opacity: 0.85;
-}
-
-@media (min-width: 901px) and (max-height: 650px) {
-    #weather-box {
-        height: 200px;
-        padding: 20px 22px;
-    }
-
-    #pomodoro-box {
-        top: 240px;
-        width: 300px;
-        padding: 16px;
-    }
-
-    #pomodoro-display {
-        margin: 12px 0;
-        font-size: 2.5rem;
-    }
-
-    #quote-box {
-        height: 125px;
-        padding: 14px 16px;
-    }
-
-    #picture-prompt {
-        margin-top: 10px;
-        font-size: 0.9rem;
-    }
 }
 
 @media (max-width: 900px) {
@@ -340,12 +316,15 @@ main {
     }
 
     header {
+        position: static;
+        text-align: center;
+    }
+
+    #settings {
         justify-content: center;
-        flex-wrap: wrap;
     }
 
     main {
-        margin-left: 0;
         padding: 24px 0;
     }
 
@@ -359,18 +338,17 @@ main {
     }
 
     #weather-box,
-    #pomodoro-box,
     #quote-box {
         position: static;
         width: 100%;
-        transform: none;
         margin-bottom: 16px;
     }
 
-    #photo {
-        background-size: contain;
-        background-position: center;
+    #timer-box {
+        position: relative;
+        top: 0;
         left: 0;
         width: 100%;
+        margin-bottom: 24px;
     }
 }
